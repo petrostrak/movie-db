@@ -14,10 +14,7 @@ async fn version(db: actix_web::web::Data<sqlx::PgPool>) -> String {
         .fetch_one(db.get_ref())
         .await;
 
-    match result {
-        Ok(version) => version,
-        Err(e) => format!("Error: {:?}", e),
-    }
+    result.unwrap_or(String::from("error: unknown"))
 }
 
 #[shuttle_runtime::main]
