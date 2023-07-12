@@ -5,7 +5,19 @@ use sqlx::Executor;
 
 #[get("/")]
 async fn hello_world() -> &'static str {
-    "Hello World!"
+    "Hello World!\r\n"
+}
+
+#[get("/version")]
+async fn version(db: actix_web::web::Data<sqlx::PgPool>) -> String {
+    let result: Result<String, sqlx::Error> = sqlx::query_scalar("SELECT version()")
+        .fetch_one(db.get_ref())
+        .await;
+
+    match result {
+        Ok(version) => version,
+        Err(e) => format!("Error: {:?}", e),
+    }
 }
 
 #[shuttle_runtime::main]
@@ -17,8 +29,10 @@ async fn actix_web(
         .await
         .map_err(CustomError::new)?;
 
+    let pool = actix_web::web::Data::new(pool);
+
     let config = move |cfg: &mut ServiceConfig| {
-        cfg.service(hello_world);
+        cfg.app_data(pool).service(hello_world).service(version);
     };
 
     Ok(config.into())
