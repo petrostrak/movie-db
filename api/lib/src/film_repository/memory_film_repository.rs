@@ -110,4 +110,18 @@ impl FilmRepository for MemoryFilmRepository {
             }
         }
     }
+
+    async fn delete_film(&self, film_id: &uuid::Uuid) -> FilmResult<Uuid> {
+        match self.films.write() {
+            Ok(mut films) => {
+                films.remove(film_id);
+                Ok(film_id.to_owned())
+            }
+            Err(e) => {
+                let err = format!("An error occured while trying to update film: {}", e);
+                tracing::error!(err);
+                Err(err)
+            }
+        }
+    }
 }
