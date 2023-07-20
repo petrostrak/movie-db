@@ -11,4 +11,7 @@ chrono = { version = "0.4", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 
 # database
-sqlx = { version = "0.6.3", default-features = false, features = [ "runtime-actix-native-tls", "macros", "postgres", "uuid", "chrono", "json" ] }
+sqlx = { version = "0.6.3", default-features = false, features = [ "runtime-actix-native-tls", "macros", "postgres", "uuid", "chrono", "json" ], optional = true }
+
+[features]
+backend = ["sqlx"]
