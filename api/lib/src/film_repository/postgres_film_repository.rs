@@ -1,4 +1,4 @@
-use shared::models::Film;
+use shared::models::{CreateFilm, Film};
 
 use super::{FilmRepository, FilmResult};
 
@@ -35,6 +35,23 @@ impl FilmRepository for PostgresFilmRepository {
         "#,
         )
         .bind(film_id)
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| e.to_string())
+    }
+
+    async fn create_film(&self, create_film: &CreateFilm) -> FilmResult<Film> {
+        sqlx::query_as::<_, Film>(
+            r#"
+            INSERT INTO films (title, director, year, poster)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id, title, director, year, poster, created_at, updated_at
+        "#,
+        )
+        .bind(&create_film.title)
+        .bind(&create_film.director)
+        .bind(create_film.year as i16)
+        .bind(&create_film.poster)
         .fetch_one(&self.pool)
         .await
         .map_err(|e| e.to_string())
