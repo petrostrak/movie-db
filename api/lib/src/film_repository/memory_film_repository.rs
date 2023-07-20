@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::RwLock};
 
+use chrono::Utc;
 use shared::models::{CreateFilm, Film};
-use sqlx::types::chrono::Utc;
 use uuid::Uuid;
 
 use super::{FilmRepository, FilmResult};
@@ -123,5 +123,43 @@ impl FilmRepository for MemoryFilmRepository {
                 Err(err)
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::MemoryFilmRepository;
+    use crate::film_repository::FilmRepository;
+    use shared::models::{CreateFilm, Film};
+
+    fn create_test_film(id: &'static str) -> Film {
+        Film {
+            id: uuid::Uuid::new_v4(),
+            title: format!("title-{}", id),
+            director: format!("director-{}", id),
+            poster: format!("poster-{}", id),
+            year: 2023,
+            created_at: Some(chrono::Utc::now()),
+            updated_at: None,
+        }
+    }
+
+    fn create_test_create_film(id: &'static str) -> CreateFilm {
+        CreateFilm {
+            title: format!("title-{}", id),
+            director: format!("director-{}", id),
+            poster: format!("poster-{}", id),
+            year: 2001,
+        }
+    }
+
+    #[actix_rt::test]
+    async fn repo_must_be_empty_on_new() {
+        let repo = MemoryFilmRepository::new();
+        let result = repo.get_films().await;
+
+        assert!(result.is_ok());
+        let result = result.unwrap();
+        assert_eq!(result.len(), 0);
     }
 }
