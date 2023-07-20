@@ -75,4 +75,18 @@ impl FilmRepository for PostgresFilmRepository {
         .await
         .map_err(|e| e.to_string())
     }
+
+    async fn delete_film(&self, film_id: &uuid::Uuid) -> FilmResult<uuid::Uuid> {
+        sqlx::query_scalar::<_, uuid::Uuid>(
+            r#"
+            DELETE FROM films
+            WHERE id = $1
+            RETURNING id
+        "#,
+        )
+        .bind(film_id)
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| e.to_string())
+    }
 }
