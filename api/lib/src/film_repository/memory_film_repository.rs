@@ -82,4 +82,32 @@ impl FilmRepository for MemoryFilmRepository {
             }
         }
     }
+
+    async fn update_film(&self, film: &Film) -> FilmResult<Film> {
+        match self.films.write() {
+            Ok(mut films) => {
+                let old_film = films.get_mut(&film.id);
+                match old_film {
+                    Some(old_film) => {
+                        let mut updated_film = film.to_owned();
+                        updated_film.created_at = old_film.created_at;
+                        updated_film.updated_at = Some(Utc::now());
+                        films.insert(film.id, updated_film.clone());
+                        tracing::debug!("Film with id {} correctly updated", film.id);
+                        Ok(updated_film)
+                    }
+                    None => {
+                        let err = format!("Film with id {} correctly updated", film.id);
+                        tracing::error!(err);
+                        Err(err)
+                    }
+                }
+            }
+            Err(e) => {
+                let err = format!("An error occured while trying to update film: {}", e);
+                tracing::error!(err);
+                Err(err)
+            }
+        }
+    }
 }
