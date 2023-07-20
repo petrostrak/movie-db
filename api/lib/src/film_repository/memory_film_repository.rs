@@ -128,6 +128,8 @@ impl FilmRepository for MemoryFilmRepository {
 
 #[cfg(test)]
 mod tests {
+    use std::{collections::HashMap, sync::RwLock};
+
     use super::MemoryFilmRepository;
     use crate::film_repository::FilmRepository;
     use shared::models::{CreateFilm, Film};
@@ -171,5 +173,27 @@ mod tests {
         assert!(result.is_ok());
         let result = result.unwrap();
         assert_eq!(result.len(), 0);
+    }
+
+    #[actix_rt::test]
+    async fn get_films_works() {
+        let store = RwLock::new(HashMap::new());
+        let film_1 = create_test_film("1");
+        let film_2 = create_test_film("2");
+
+        {
+            let mut store = store.write().unwrap();
+            store.insert(film_1.id, film_1.clone());
+            store.insert(film_2.id, film_2.clone());
+        }
+
+        let repo = MemoryFilmRepository { films: store };
+        let result = repo.get_films().await;
+
+        assert!(result.is_ok());
+        let result = result.unwrap();
+        assert_eq!(result.len(), 2);
+        assert!(result.iter().any(|f| f.id == film_1.id));
+        assert!(result.iter().any(|f| f.id == film_2.id));
     }
 }
