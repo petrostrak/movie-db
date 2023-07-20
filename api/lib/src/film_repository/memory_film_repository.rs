@@ -38,4 +38,23 @@ impl FilmRepository for MemoryFilmRepository {
 
         result
     }
+
+    async fn get_film(&self, film_id: &uuid::Uuid) -> FilmResult<Film> {
+        let result = self
+            .films
+            .read()
+            .map_err(|e| format!("An error occured while trying to read films: {}", e))
+            .and_then(|films| {
+                films
+                    .get(film_id)
+                    .cloned()
+                    .ok_or_else(|| format!("Couln't fild film: {}", film_id))
+            });
+
+        if result.is_err() {
+            tracing::error!("Could not retrive film with id {}", film_id);
+        }
+
+        result
+    }
 }
