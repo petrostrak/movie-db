@@ -1,6 +1,7 @@
 use std::{collections::HashMap, sync::RwLock};
 
-use shared::models::Film;
+use shared::models::{CreateFilm, Film};
+use sqlx::types::chrono::Utc;
 use uuid::Uuid;
 
 use super::{FilmRepository, FilmResult};
@@ -56,5 +57,29 @@ impl FilmRepository for MemoryFilmRepository {
         }
 
         result
+    }
+
+    async fn create_film(&self, create_film: &CreateFilm) -> FilmResult<Film> {
+        match self.films.write() {
+            Ok(mut films) => {
+                let new_film = Film {
+                    id: uuid::Uuid::new_v4(),
+                    title: create_film.title.clone(),
+                    director: create_film.director.clone(),
+                    year: create_film.year,
+                    poster: create_film.poster.clone(),
+                    created_at: Some(Utc::now()),
+                    updated_at: None,
+                };
+                films.insert(new_film.id, new_film.clone());
+                tracing::trace!("Film with id {} correctly created", new_film.id);
+                Ok(new_film)
+            }
+            Err(e) => {
+                let err = format!("An error occured while trying to update film: {}", e);
+                tracing::error!(err);
+                Err(err)
+            }
+        }
     }
 }
