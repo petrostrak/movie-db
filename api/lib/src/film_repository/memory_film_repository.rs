@@ -162,4 +162,14 @@ mod tests {
         let result = result.unwrap();
         assert_eq!(result.len(), 0);
     }
+
+    #[actix_rt::test]
+    async fn repo_must_be_empty_on_default() {
+        let repo = MemoryFilmRepository::default();
+        let result = repo.get_films().await;
+
+        assert!(result.is_ok());
+        let result = result.unwrap();
+        assert_eq!(result.len(), 0);
+    }
 }
