@@ -56,4 +56,23 @@ impl FilmRepository for PostgresFilmRepository {
         .await
         .map_err(|e| e.to_string())
     }
+
+    async fn update_film(&self, film: &Film) -> FilmResult<Film> {
+        sqlx::query_as::<_, Film>(
+            r#"
+            UPDATE films
+            SET title = $2, director = $3, year = $4, poster = $5
+            WHERE id = $1
+            RETURNING id, title, director, year, poster, created_at, updated_at
+            "#,
+        )
+        .bind(film.id)
+        .bind(&film.title)
+        .bind(&film.director)
+        .bind(film.year as i16)
+        .bind(&film.poster)
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| e.to_string())
+    }
 }
