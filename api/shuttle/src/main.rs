@@ -13,7 +13,8 @@ async fn actix_web(
         .map_err(CustomError::new)?;
 
     let film_repo = api_lib::film_repository::PostgresFilmRepository::new(pool);
-    let film_repo = actix_web::web::Data::new(film_repo);
+    let film_repo: actix_web::web::Data<Box<dyn api_lib::film_repository::FilmRepository>> =
+        actix_web::web::Data::new(Box::new(film_repo));
 
     let config = move |cfg: &mut ServiceConfig| {
         cfg.app_data(film_repo)
