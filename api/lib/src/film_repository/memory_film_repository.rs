@@ -128,7 +128,7 @@ impl FilmRepository for MemoryFilmRepository {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, result, sync::RwLock};
+    use std::{collections::HashMap, sync::RwLock};
 
     use super::MemoryFilmRepository;
     use crate::film_repository::FilmRepository;
