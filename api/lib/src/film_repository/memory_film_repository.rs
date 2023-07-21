@@ -97,7 +97,7 @@ impl FilmRepository for MemoryFilmRepository {
                         Ok(updated_film)
                     }
                     None => {
-                        let err = format!("Film with id {} correctly updated", film.id);
+                        let err = format!("Film with id {} does not exist", film.id);
                         tracing::error!(err);
                         Err(err)
                     }
@@ -195,5 +195,17 @@ mod tests {
         assert_eq!(result.len(), 2);
         assert!(result.iter().any(|f| f.id == film_1.id));
         assert!(result.iter().any(|f| f.id == film_2.id));
+    }
+
+    #[actix_rt::test]
+    async fn get_film_fails_if_file_is_not_present() {
+        let film_update = create_test_film("2");
+
+        let repo = MemoryFilmRepository::default();
+        let result = repo.update_film(&film_update).await;
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("does not exist"));
     }
 }
