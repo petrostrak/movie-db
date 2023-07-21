@@ -128,7 +128,7 @@ impl FilmRepository for MemoryFilmRepository {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, sync::RwLock};
+    use std::{collections::HashMap, result, sync::RwLock};
 
     use super::MemoryFilmRepository;
     use crate::film_repository::FilmRepository;
@@ -251,5 +251,21 @@ mod tests {
         assert_eq!(updated_file.created_at, film.created_at);
         assert!(updated_file.updated_at.is_some());
         assert!(film.updated_at.is_none());
+    }
+
+    #[actix_rt::test]
+    async fn update_film_fails_if_file_is_not_present() {
+        let store = RwLock::new(HashMap::new());
+        let film = create_test_film("1");
+        store.write().unwrap().insert(film.id, film.clone());
+
+        let film_update = create_test_film("2");
+
+        let repo = MemoryFilmRepository { films: store };
+        let result = repo.update_film(&film_update).await;
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("does not exist"));
     }
 }
