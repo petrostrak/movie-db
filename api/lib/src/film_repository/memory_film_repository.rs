@@ -268,4 +268,17 @@ mod tests {
         let err = result.unwrap_err();
         assert!(err.contains("does not exist"));
     }
+
+    #[actix_rt::test]
+    async fn delete_film_works() {
+        let store = RwLock::new(HashMap::new());
+        let film = create_test_film("1");
+        store.write().unwrap().insert(film.id, film.clone());
+
+        let repo = MemoryFilmRepository { films: store };
+        let result = repo.delete_film(&film.id).await;
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), film.id);
+    }
 }
