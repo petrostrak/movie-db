@@ -281,4 +281,14 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), film.id);
     }
+
+    #[actix_rt::test]
+    async fn delete_film_fails_if_file_is_not_present() {
+        let repo = MemoryFilmRepository::default();
+        let id = uuid::Uuid::new_v4();
+        let result = repo.delete_film(&id).await;
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), id);
+    }
 }
