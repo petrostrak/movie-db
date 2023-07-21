@@ -208,4 +208,21 @@ mod tests {
         let err = result.unwrap_err();
         assert!(err.contains("does not exist"));
     }
+
+    #[actix_rt::test]
+    async fn create_film_works() {
+        let store = RwLock::new(HashMap::new());
+        let create_film = create_test_create_film("1");
+
+        let repo = MemoryFilmRepository { films: store };
+        let result = repo.create_film(&create_film).await;
+
+        assert!(result.is_ok());
+        let created_file = result.unwrap();
+        assert_eq!(created_file.title, create_film.title);
+        assert_eq!(created_file.director, create_film.director);
+        assert_eq!(created_file.poster, create_film.poster);
+        assert_eq!(created_file.year, create_film.year);
+        assert!(created_file.created_at.is_some());
+    }
 }
