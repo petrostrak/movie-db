@@ -225,4 +225,31 @@ mod tests {
         assert_eq!(created_file.year, create_film.year);
         assert!(created_file.created_at.is_some());
     }
+
+    #[actix_rt::test]
+    async fn update_film_works() {
+        let store = RwLock::new(HashMap::new());
+        let film = create_test_film("1");
+        store.write().unwrap().insert(film.id, film.clone());
+
+        let mut film_update = film.clone();
+        film_update.title = "new-title".to_string();
+        film_update.year = 2002;
+
+        let repo = MemoryFilmRepository { films: store };
+        let result = repo.update_film(&film_update).await;
+
+        assert!(result.is_ok());
+        let updated_file = result.unwrap();
+        assert_eq!(updated_file.id, film.id);
+        assert_ne!(updated_file.title, film.title);
+        assert_eq!(updated_file.title, film_update.title);
+        assert_eq!(updated_file.director, film.director);
+        assert_eq!(updated_file.poster, film.poster);
+        assert_ne!(updated_file.year, film.year);
+        assert_eq!(updated_file.year, film_update.year);
+        assert_eq!(updated_file.created_at, film.created_at);
+        assert!(updated_file.updated_at.is_some());
+        assert!(film.updated_at.is_none());
+    }
 }
