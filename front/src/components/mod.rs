@@ -1,4 +1,5 @@
 mod button;
+mod film_card;
 mod footer;
 mod header;
 
