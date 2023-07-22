@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 
 mod components;
 mod models;
-use components::{Header, Footer};
+use components::{Header, Footer, FilmModal};
 
 fn main() {
     wasm_logger::init(wasm_logger::Config::default().module_prefix("front"));
@@ -19,6 +19,10 @@ fn App(cx: Scope) -> Element {
                 class: "md:container md:mx-auto md:py-8 flex-1",
             }
             Footer {}
+            FilmModal {
+                on_create_or_update: move |_| {},
+                on_cancel: move |_| {}
+            }
         }   
     })
 }
