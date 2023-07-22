@@ -2,6 +2,7 @@
 use dioxus::prelude::*;
 
 mod components;
+mod models;
 use components::{Header, Footer};
 
 fn main() {
