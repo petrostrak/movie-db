@@ -16,11 +16,11 @@ pub struct FilmModalProps<'a> {
 pub fn FilmModal<'a>(cx: Scope<'a, FilmModalProps>) -> Element<'a> {
     let is_modal_visible = use_shared_state::<FilmModalVisibility>(cx).unwrap();
     let draft_film = use_state::<Film>(cx, || Film {
-        id: Uuid::new_v4(),
         title: "".to_string(),
+        poster: "".to_string(),
         director: "".to_string(),
         year: 1900,
-        poster: "".to_string(),
+        id: Uuid::new_v4(),
         created_at: None,
         updated_at: None,
     });
@@ -31,11 +31,11 @@ pub fn FilmModal<'a>(cx: Scope<'a, FilmModalProps>) -> Element<'a> {
             match film {
                 Some(film) => draft_film.set(film),
                 None => draft_film.set(Film {
-                    id: Uuid::new_v4(),
                     title: "".to_string(),
+                    poster: "".to_string(),
                     director: "".to_string(),
                     year: 1900,
-                    poster: "".to_string(),
+                    id: Uuid::new_v4(),
                     created_at: None,
                     updated_at: None,
                 }),
@@ -143,11 +143,11 @@ pub fn FilmModal<'a>(cx: Scope<'a, FilmModalProps>) -> Element<'a> {
                         button_type: ButtonType::Secondary,
                         onclick: move |evt| {
                             draft_film.set(Film {
-                                id: Uuid::new_v4(),
                                 title: "".to_string(),
+                                poster: "".to_string(),
                                 director: "".to_string(),
                                 year: 1900,
-                                poster: "".to_string(),
+                                id: Uuid::new_v4(),
                                 created_at: None,
                                 updated_at: None,
                             });
@@ -160,14 +160,14 @@ pub fn FilmModal<'a>(cx: Scope<'a, FilmModalProps>) -> Element<'a> {
                         onclick: move |_| {
                             cx.props.on_create_or_update.call(draft_film.get().clone());
                             draft_film.set(Film {
-                                id: Uuid::new_v4(),
                                 title: "".to_string(),
+                                poster: "".to_string(),
                                 director: "".to_string(),
                                 year: 1900,
-                                poster: "".to_string(),
+                                id: Uuid::new_v4(),
                                 created_at: None,
                                 updated_at: None,
-                            });
+                            })
                         },
                         "Save film"
                     }
