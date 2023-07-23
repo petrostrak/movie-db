@@ -7,6 +7,8 @@ use components::{Header, Footer, FilmModal, FilmCard};
 use models::FilmModalVisibility;
 use shared::models::Film;
 
+const API_ENDPOINT: &str = "api/v1";
+
 fn main() {
     wasm_logger::init(wasm_logger::Config::default().module_prefix("front"));
     dioxus_web::launch(App);
@@ -18,6 +20,19 @@ fn App(cx: Scope) -> Element {
     let films = use_state::<Option<Vec<Film>>>(cx, || None);
     let selected_film = use_state::<Option<Film>>(cx, || None);
     let force_get_films = use_state(cx, || ());
+
+    {
+        let films = films.clone();
+
+        use_effect(cx, force_get_films, |_| async move {
+            let existing_films = get_films().await;
+            if existing_films.is_empty() {
+                films.set(None)
+            } else {
+                films.set(Some(existing_films));
+            }
+        })
+    }
 
     cx.render(rsx! {
         main {
@@ -57,4 +72,23 @@ fn App(cx: Scope) -> Element {
             }
         }   
     })
+}
+
+fn films_endpoint() -> String {
+    let window = web_sys::window().expect("no global `window` exists");
+    let location = window.location();
+    let host = location.host().expect("should have a host");
+    let protocol = location.protocol().expect("should have a protocol");
+    let endpoint = format!("{}//{}/{}", protocol, host, API_ENDPOINT);
+    format!("{}/films", endpoint)
+}
+
+async fn get_films() -> Vec<Film> {
+    log::info!("Fetching films from {}", films_endpoint());
+    reqwest::get(&films_endpoint())
+        .await
+        .unwrap()
+        .json::<Vec<Film>>()
+        .await
+        .unwrap()
 }
